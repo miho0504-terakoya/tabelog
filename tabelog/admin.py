@@ -3,6 +3,6 @@ from .models import Restaurant
 
 
 class RestaurantAdmin(admin.ModelAdmin):
-    list_display = ('name', 'url')
+    list_display = ('name','station', 'url')
 
 admin.site.register(Restaurant, RestaurantAdmin)

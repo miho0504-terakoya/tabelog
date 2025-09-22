@@ -3,15 +3,16 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.common.exceptions import NoSuchElementException
 import time
 import re
 from tabelog.models import Restaurant
 from datetime import datetime, timedelta #日付上限を設定して新規店舗を抽出
 
+
 class Command(BaseCommand):
     help = "食べログスクレイピング処理"
-
-
+    
     def get_new_shop_data(self, station_name):
         print("スクレイピング処理")
 
@@ -19,8 +20,7 @@ class Command(BaseCommand):
         chrome_options = webdriver.ChromeOptions()
         chrome_options.add_argument('--headless')
         chrome_options.add_argument('--no-sandbox')
-        chrome_options.add_argument('--disable-dev-shm-usage')
-        
+        chrome_options.add_argument('--disable-dev-shm-usage')        
 
         # Chromeを立ち上げる
         chrome_driver = webdriver.Chrome(options=chrome_options)
@@ -31,7 +31,6 @@ class Command(BaseCommand):
         # 最大30秒間、トップページが表示されるのを待つ
         wait = WebDriverWait(chrome_driver, 30)
 
-        
         # エリアを指定して入力する
         # station_name = input('駅名を入力してください：')
         pernet_element = chrome_driver.find_element(By.CSS_SELECTOR, '#react-search-header > form > div.sc-fHSyak.sc-dubCtV.ljbUvS.hhzuBp')
@@ -58,7 +57,6 @@ class Command(BaseCommand):
         
 
         while True:
-        
             # 店舗リストを取得（上限日を指定）
             restaurants = chrome_driver.find_elements(By.CSS_SELECTOR, 'div.list-rst__contents')
             limit_date = datetime.now() - timedelta(days=30)
@@ -67,7 +65,18 @@ class Command(BaseCommand):
                 try:
                     name = restaurant.find_element(By.CSS_SELECTOR, 'a.list-rst__rst-name-target').text
                     url = restaurant.find_element(By.CSS_SELECTOR, 'a.list-rst__rst-name-target').get_attribute('href')
-                
+                    
+                    try:
+                        genre_text = restaurant.find_element(By.CSS_SELECTOR, 'div.list-rst__area-genre').text
+                        parts = [g.strip() for g in genre_text.split(" / ")]
+                        if len(parts) > 1:
+                            genres = parts[1:]
+                        else:
+                            genres = []
+                    except NoSuchElementException:
+                        genres = []
+                        
+                        
                     # 店舗IDを抽出
                     match = re.search(r'/(\d+)/$', url)
                     restaurant_id = match.group(1) if match else None
@@ -85,7 +94,8 @@ class Command(BaseCommand):
                                 "station": station_name,
                                 "name": name,
                                 "url": url,
-                                "open_date": open_date
+                                "open_date": open_date,
+                                "genre": genres
                                 }
                              )
                         print(f"保存: {station_name} -{name} ({restaurant_id} {url} {open_date})")
@@ -113,3 +123,4 @@ class Command(BaseCommand):
         # stations = データベースのマスター情報から取得する
         for station in stations:
             self.get_new_shop_data(station)
+ 

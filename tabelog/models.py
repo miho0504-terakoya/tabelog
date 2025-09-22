@@ -5,7 +5,7 @@ class Restaurant(models.Model):
     name = models.CharField(max_length=200, null=True, blank=True)
     station = models.CharField(max_length=200, null=True, blank=True)
     open_date = models.DateField(null=True, blank=True)
-    #category = models.CharField(max_length=200)
+    genre = models.CharField(max_length=100, null=True, blank=True)
     #lunchprice = models.CharField(max_length=200)
     #dinnerprice = models.CharField(max_length=200)
     url = models.URLField()
