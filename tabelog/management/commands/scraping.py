@@ -8,11 +8,18 @@ import time
 import re
 from tabelog.models import Restaurant
 from datetime import datetime, timedelta #日付上限を設定して新規店舗を抽出
+from stations.models import Station   # 新しい駅マスターを import
 
 
 class Command(BaseCommand):
     help = "食べログスクレイピング処理"
-    
+    def handle(self, *args, **options):
+        # 駅マスターから有効な駅名だけ取得
+        stations = Station.objects.filter(is_active=True).values_list("name", flat=True)
+        
+        for station in stations:
+            self.get_new_shop_data(station)
+        
     def get_new_shop_data(self, station_name):
         print("スクレイピング処理")
 
@@ -60,7 +67,7 @@ class Command(BaseCommand):
             # 店舗リストを取得（上限日を指定）
             restaurants = chrome_driver.find_elements(By.CSS_SELECTOR, 'div.list-rst__contents')
             limit_date = datetime.now() - timedelta(days=30)
-
+            
             for restaurant in restaurants:
                 try:
                     name = restaurant.find_element(By.CSS_SELECTOR, 'a.list-rst__rst-name-target').text
@@ -105,6 +112,7 @@ class Command(BaseCommand):
                 
                 except Exception as e:
                     print(f"保存失敗: {e}")
+
             else:
                 # 次のページボタンを押
                 next_button = chrome_driver.find_element(By.CSS_SELECTOR, 'a.c-pagination__arrow--next')
@@ -116,11 +124,5 @@ class Command(BaseCommand):
         chrome_driver.quit()
         print("スクレイピング処理終了")
 
-    def handle(self, *args, **options):
-        stations = [
-            "東京駅", "品川駅"
-        ]
-        # stations = データベースのマスター情報から取得する
-        for station in stations:
-            self.get_new_shop_data(station)
+
  
