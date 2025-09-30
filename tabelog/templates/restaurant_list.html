@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>新規オープン店舗一覧</title>
+</head>
+<body>
+    <h1>新規オープン店舗一覧</h1>
+    <!--検索フォーム-->
+    <form method="get">
+        <input type="text" name="q" placeholder="店名やジャンル検索" value="{{ q }}">
+        <input type="text" name="station" placeholder="駅名" value="{{ station }}">
+        <input type="text" name="genre" placeholder="ジャンル" value="{{ genre }}">
+        <button type="submit">検索</button>
+        <a href="{% url 'restaurant_list' %}">リセット</a>
+
+    <ul>
+        {% for r in restaurants %}
+            <li>
+                <strong>{{ r.name }}</strong>（{{ r.station }}）
+                <br>
+                <a href="{{ r.url }}" target="_blank">食べログページ</a>
+                <br>
+                オープン日: {{ r.open_date }}
+                <br>
+                ジャンル: {{ r.genre|join:", " }}
+            </li>
+        {% empty %}
+            <li>店舗情報がありません</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
