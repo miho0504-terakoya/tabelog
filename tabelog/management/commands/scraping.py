@@ -79,7 +79,7 @@ class Command(BaseCommand):
                         if len(parts) > 1:
                             genres = parts[1:]
                         else:
-                            genres = []
+                            genres = [parts[0]] if parts else []
                     except NoSuchElementException:
                         genres = []
                         
