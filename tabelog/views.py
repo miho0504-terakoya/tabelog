@@ -20,7 +20,10 @@ def restaurant_list(request):
     q = request.GET.get("q")
     if q:
         restaurants = restaurants.filter(name__icontains=q) | restaurants.filter(genre__icontains=q)
-        
+
+    # 下記２行を追加
+    for r in restaurants:
+        r.genre = r.genre.replace("['","").replace("']","").split("、")
         
     
     return render(request, "restaurant_list.html", {

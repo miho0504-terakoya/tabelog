@@ -31,7 +31,8 @@ class Command(BaseCommand):
 
         # Chromeを立ち上げる
         chrome_driver = webdriver.Chrome(options=chrome_options)
-
+        chrome_driver.set_window_size(1920, 1080) # 追加必要
+        
         # 東京都の食べログのトップページにアクセス
         chrome_driver.get('https://tabelog.com/tokyo/')
 
@@ -49,6 +50,15 @@ class Command(BaseCommand):
             (By.CSS_SELECTOR, '#react-search-header > form > div.sc-ikHGee.JTHPh > button')
         )
                                    )
+         # 食べログの言語選択やCookieポップアップを閉じる処理
+        try:
+            overlay = WebDriverWait(chrome_driver, 5).until(
+                EC.visibility_of_element_located((By.CSS_SELECTOR, ".c-overlay"))
+            )
+            chrome_driver.execute_script("arguments[0].style.display='none';", overlay)
+            print("オーバーレイを非表示にしました")
+        except Exception:
+            pass
         search_button.click()
         time.sleep(5)
         
