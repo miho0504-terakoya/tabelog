@@ -133,6 +133,3 @@ class Command(BaseCommand):
             break   #  whileループを抜ける(途中でスキップした場合)
         chrome_driver.quit()
         print("スクレイピング処理終了")
-
-
- 
